@@ -1,4 +1,36 @@
-[CmdletBinding()]
+<#
+.SYNOPSIS
+	Builds the router firmware for the Banana Pi BPI-R4.
+
+.DESCRIPTION
+	This script builds the router firmware for the Banana Pi BPI-R4 using Docker or Podman. It builds the U-Boot and ARM Trusted Firmware (ATF) binaries, and then packages the firmware image into a compressed archive.
+
+.PARAMETER UBootRepository
+	(Optional) The URL or path to an alternate U-Boot repository. If not provided, the default repository as specified in the Dockerfile is used.
+
+	If a URL is provided, the repository is cloned inside the container.
+	If a path is provided, it is mounted inside the container and changes made during the build process are reflected back on the host.
+
+.PARAMETER UBootBranch
+	(Optional) The U-Boot branch to checkout. If not provided, the default of the respective repository is used.
+
+.PARAMETER ATFRepository
+	(Optional) The URL or path to an alternate ATF repository. If not provided, the default repository as specified in the Dockerfile is used.
+
+	If a URL is provided, the repository is cloned inside the container.
+	If a path is provided, it is mounted inside the container and changes made during the build process are reflected back on the host.
+
+.PARAMETER ATFBranch
+	(Optional) The ATF branch to checkout. If not provided, the default of the respective repository is used.
+
+.PARAMETER RefreshBuilder
+	Refresh the base builder image, even if no changes have been made to the Dockerfile.
+
+.PARAMETER SkipATF
+	Skip building the ATF binaries.
+	This is useful when you only want to build the U-Boot binary.
+#>
+
 param (
 	[string]$UBootRepository,
 	[string]$UBootBranch,

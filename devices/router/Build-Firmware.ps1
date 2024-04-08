@@ -4,8 +4,8 @@ param (
 	[string]$UBootBranch,
 	[string]$ATFRepository,
 	[string]$ATFBranch,
-	[switch]$RefreshBuilder = $false,
-	[switch]$SkipATF = $false
+	[switch]$RefreshBuilder,
+	[switch]$SkipATF
 )
 
 Set-Variable -Option Constant BuilderImageName "router-firmware-builder"
@@ -34,7 +34,9 @@ $volumeArgs = @("-v", "${PWD}/firmware:$WorkDir/firmware")
 if ($UBootRepository) {
 	if ($UBootRepository -match '^https?://.*\.git$') {
 		$buildArgs += "--build-arg", "UBOOT_REPO=$UBootRepository"
-		if ($UBootBranch) { $buildArgs += "--build-arg", "UBOOT_BRANCH=$UBootBranch" }
+		if ($UBootBranch) {
+			$buildArgs += "--build-arg", "UBOOT_BRANCH=$UBootBranch"
+		}
 	}
 	elseif (Test-Path -Path $UBootRepository -PathType Container) {
 		$buildArgs += "--build-arg", "UBOOT_REPO="
@@ -60,7 +62,9 @@ if (-not $SkipATF) {
 	if ($ATFRepository) {
 		if ($ATFRepository -match '^https?://.*\.git$') {
 			$buildArgs += "--build-arg", "ATF_REPO=$ATFRepository"
-			if ($ATFBranch) { $buildArgs += "--build-arg", "ATF_BRANCH=$ATFBranch" }
+			if ($ATFBranch) {
+				$buildArgs += "--build-arg", "ATF_BRANCH=$ATFBranch"
+			}
 		}
 		elseif (Test-Path -Path $ATFRepository -PathType Container) {
 			$buildArgs += "--build-arg", "ATF_REPO="

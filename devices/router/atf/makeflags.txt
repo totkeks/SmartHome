@@ -1,1 +1,1 @@
-# Add additional make flags for the U-Boot build here
+# Add additional make flags for the ATF build here

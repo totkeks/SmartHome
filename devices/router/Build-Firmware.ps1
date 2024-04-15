@@ -32,12 +32,18 @@
 #>
 
 param (
+	[Parameter(Mandatory)]
+	[ValidateSet("UBoot", "ATF", "OpenWrt")]
+	[string]$Target,
+	[switch]$RefreshBuilder,
+
 	[string]$UBootRepository,
 	[string]$UBootBranch,
+
 	[string]$ATFRepository,
 	[string]$ATFBranch,
-	[switch]$RefreshBuilder,
-	[switch]$SkipATF
+
+	[string]$OpenWrtImageBuilder
 )
 
 Set-Variable -Option Constant BuilderImageName "router-firmware-builder"
@@ -59,36 +65,44 @@ if ($RefreshBuilder) {
 # ----------------------------------------
 # U-Boot Build
 # ----------------------------------------
-$buildArgs = @()
-$volumeArgs = @("-v", "${PWD}/firmware:$WorkDir/firmware")
+if ($Target -contains "UBoot" -or $Target -contains "ATF") {
+	$buildArgs = @()
+	$volumeArgs = @(
+		"-v", "${PWD}/firmware:$WorkDir/firmware"
+	)
 
-# Handle U-Boot repository override, if provided
-if ($UBootRepository) {
-	if ($UBootRepository -match '^https?://.*\.git$') {
-		$buildArgs += "--build-arg", "UBOOT_REPO=$UBootRepository"
-		if ($UBootBranch) {
-			$buildArgs += "--build-arg", "UBOOT_BRANCH=$UBootBranch"
+	# Handle U-Boot repository override, if provided
+	if ($UBootRepository) {
+		if ($UBootRepository -match '^https?://.*\.git$') {
+			$buildArgs += "--build-arg", "UBOOT_REPO=$UBootRepository"
+			if ($UBootBranch) {
+				$buildArgs += "--build-arg", "UBOOT_BRANCH=$UBootBranch"
+			}
+		}
+		elseif (Test-Path -Path $UBootRepository -PathType Container) {
+			$buildArgs += "--build-arg", "UBOOT_REPO="
+			$volumeArgs += "-v", "${PWD}/${UBootRepository}:/$WorkDir/u-boot"
+		}
+		else {
+			throw "The provided U-Boot repository path is not valid or does not exist."
 		}
 	}
-	elseif (Test-Path -Path $UBootRepository -PathType Container) {
-		$buildArgs += "--build-arg", "UBOOT_REPO="
-		$volumeArgs += "-v", "${PWD}/${UBootRepository}:/$WorkDir/u-boot"
-	}
-	else {
-		throw "The provided U-Boot repository path is not valid or does not exist."
-	}
-}
 
-$uBootImageName = "$BuilderImageName-uboot"
-& $runtime build @buildArgs --tag $uBootImageName --file u-boot/Dockerfile u-boot || $(throw "Failed to build U-Boot builder using u-boot/Dockerfile.")
-& $runtime run @volumeArgs --rm --name $uBootImageName $uBootImageName || $(throw "Failed to build U-Boot.")
+	$uBootImageName = "$BuilderImageName-uboot"
+
+	& $runtime build @buildArgs --tag $uBootImageName --file u-boot/Dockerfile u-boot || $(throw "Failed to build U-Boot builder using u-boot/Dockerfile.")
+
+	& $runtime run @volumeArgs --rm --name $uBootImageName $uBootImageName || $(throw "Failed to build U-Boot.")
+}
 
 # ----------------------------------------
 # ATF Build
 # ----------------------------------------
-if (-not $SkipATF) {
+if ($Target -contains "ATF") {
 	$buildArgs = @()
-	$volumeArgs = @("-v", "${PWD}/firmware:$WorkDir/firmware")
+	$volumeArgs = @(
+		"-v", "${PWD}/firmware:$WorkDir/firmware"
+	)
 
 	# Handle ATF repository override, if provided
 	if ($ATFRepository) {
@@ -108,8 +122,31 @@ if (-not $SkipATF) {
 	}
 
 	$atfImageName = "$BuilderImageName-atf"
+
 	& $runtime build @buildArgs --tag $atfImageName --file atf/Dockerfile atf || $(throw "Failed to build ATF builder using atf/Dockerfile.")
+
 	& $runtime run @volumeArgs --rm --name $atfImageName $atfImageName || $(throw "Failed to build ATF.")
+}
+
+# ----------------------------------------
+# OpenWrt Build
+# ----------------------------------------
+if ($Target -contains "OpenWrt") {
+	$buildArgs = @()
+	$volumeArgs = @(
+		"-v", "${PWD}/firmware:$WorkDir/firmware",
+		"-v", "${PWD}/openwrt/files:$WorkDir/files"
+	)
+
+	if ($OpenWrtImageBuilder) {
+		$buildArgs += "--build-arg", "IMAGE_BUILDER=$OpenWrtImageBuilder"
+	}
+
+	$openwrtImageName = "$BuilderImageName-openwrt"
+
+	& $runtime build @buildArgs --tag $openwrtImageName --file openwrt/Dockerfile openwrt || $(throw "Failed to build OpenWrt builder using openwrt/Dockerfile.")
+
+	& $runtime run @volumeArgs --rm --name $openwrtImageName $openwrtImageName || $(throw "Failed to build OpenWrt.")
 }
 
 Write-Output "Firmware built successfully."

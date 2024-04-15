@@ -14,6 +14,7 @@ make -j$(nproc) image \
 	PACKAGES=$(grep -v '^#' ../packages.txt | grep -v '^$' | tr '\n' ' ')
 
 echo "Copying files to the firmware directory..."
-find bin -type f -exec cp -v {} ../firmware \;
+prefix=$(basename $(find bin -type f -name '*.manifest') .manifest)
+find bin -type f -exec bash -c 'fileName=$(basename "$0"); shortName=${fileName/$1/openwrt}; cp -v "$0" "../firmware/$shortName"' {} $prefix \;
 
 echo "OpenWrt build process was successful."

@@ -8,8 +8,8 @@ RUN if [ -n "$UBOOT_REPO" ]; then \
 	git clone --depth 1 ${UBOOT_BRANCH:+-b ${UBOOT_BRANCH}} ${UBOOT_REPO} u-boot; \
 	fi
 
-COPY makeflags.txt .
 COPY build.sh .
+COPY makeflags.txt .
 COPY uEnv.txt .
 
 RUN chmod +x build.sh

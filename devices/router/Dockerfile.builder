@@ -10,13 +10,18 @@ RUN apt-get update \
 	build-essential \
 	ca-certificates \
 	device-tree-compiler \
+	file \
 	flex \
+	gawk \
 	gcc-aarch64-linux-gnu \
 	git \
 	libssl-dev \
 	make \
+	python3-distutils \
+	unzip \
 	wget \
 	xxd \
+	zstd \
 	&& rm -rf /var/lib/apt/lists/*
 
 WORKDIR /workspace

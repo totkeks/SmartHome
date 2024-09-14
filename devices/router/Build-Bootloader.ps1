@@ -5,6 +5,12 @@
 .DESCRIPTION
 	This script builds the router firmware for the Banana Pi BPI-R4 using Docker or Podman. It builds the U-Boot and ARM Trusted Firmware (ATF) binaries, and then packages the firmware image into a compressed archive.
 
+.PARAMETER Target
+	(Mandatory) The target to build. Must be one of "UBoot", "ATF".
+
+.PARAMETER RefreshBuilder
+	Refresh the base builder image, even if no changes have been made to the Dockerfile.
+
 .PARAMETER UBootRepository
 	(Optional) The URL or path to an alternate U-Boot repository. If not provided, the default repository as specified in the Dockerfile is used.
 
@@ -22,18 +28,11 @@
 
 .PARAMETER ATFBranch
 	(Optional) The ATF branch to checkout. If not provided, the default of the respective repository is used.
-
-.PARAMETER RefreshBuilder
-	Refresh the base builder image, even if no changes have been made to the Dockerfile.
-
-.PARAMETER SkipATF
-	Skip building the ATF binaries.
-	This is useful when you only want to build the U-Boot binary.
 #>
 
 param (
 	[Parameter(Mandatory)]
-	[ValidateSet("UBoot", "ATF", "OpenWrt")]
+	[ValidateSet("UBoot", "ATF")]
 	[string]$Target,
 	[switch]$RefreshBuilder,
 
@@ -41,9 +40,7 @@ param (
 	[string]$UBootBranch,
 
 	[string]$ATFRepository,
-	[string]$ATFBranch,
-
-	[string]$OpenWrtImageBuilder
+	[string]$ATFBranch
 )
 
 Set-Variable -Option Constant BuilderImageName "router-firmware-builder"
@@ -69,6 +66,8 @@ if ($Target -contains "UBoot" -or $Target -contains "ATF") {
 	$buildArgs = @()
 	$volumeArgs = @(
 		"-v", "${PWD}/firmware:$WorkDir/firmware"
+		"-v", "${PWD}/u-boot/bpi-r4.conf:$WorkDir/config"
+		"-v", "${PWD}/u-boot/uEnv.txt:$WorkDir/uEnv.txt"
 	)
 
 	# Handle U-Boot repository override, if provided
@@ -92,7 +91,7 @@ if ($Target -contains "UBoot" -or $Target -contains "ATF") {
 
 	& $runtime build @buildArgs --tag $uBootImageName --file u-boot/Dockerfile u-boot || $(throw "Failed to build U-Boot builder using u-boot/Dockerfile.")
 
-	& $runtime run @volumeArgs --rm --name $uBootImageName $uBootImageName || $(throw "Failed to build U-Boot.")
+	& $runtime run @volumeArgs --name $uBootImageName $uBootImageName || $(throw "Failed to build U-Boot.")
 }
 
 # ----------------------------------------
@@ -126,27 +125,6 @@ if ($Target -contains "ATF") {
 	& $runtime build @buildArgs --tag $atfImageName --file atf/Dockerfile atf || $(throw "Failed to build ATF builder using atf/Dockerfile.")
 
 	& $runtime run @volumeArgs --rm --name $atfImageName $atfImageName || $(throw "Failed to build ATF.")
-}
-
-# ----------------------------------------
-# OpenWrt Build
-# ----------------------------------------
-if ($Target -contains "OpenWrt") {
-	$buildArgs = @()
-	$volumeArgs = @(
-		"-v", "${PWD}/firmware:$WorkDir/firmware",
-		"-v", "${PWD}/openwrt/files:$WorkDir/files"
-	)
-
-	if ($OpenWrtImageBuilder) {
-		$buildArgs += "--build-arg", "IMAGE_BUILDER=$OpenWrtImageBuilder"
-	}
-
-	$openwrtImageName = "$BuilderImageName-openwrt"
-
-	& $runtime build @buildArgs --tag $openwrtImageName --file openwrt/Dockerfile openwrt || $(throw "Failed to build OpenWrt builder using openwrt/Dockerfile.")
-
-	& $runtime run @volumeArgs --rm --name $openwrtImageName $openwrtImageName || $(throw "Failed to build OpenWrt.")
 }
 
 Write-Output "Firmware built successfully."

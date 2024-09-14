@@ -8,7 +8,6 @@ RUN if [ -n "$ATF_REPO" ]; then \
 	git clone --depth 1 ${ATF_BRANCH:+-b ${ATF_BRANCH}} ${ATF_REPO} atf; \
 	fi
 
-COPY makeflags.txt .
 COPY build.sh .
 
 RUN chmod +x build.sh

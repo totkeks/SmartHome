@@ -9,8 +9,6 @@ RUN if [ -n "$UBOOT_REPO" ]; then \
 	fi
 
 COPY build.sh .
-COPY makeflags.txt .
-COPY uEnv.txt .
 
 RUN chmod +x build.sh
 

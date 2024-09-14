@@ -91,7 +91,7 @@ if ($Target -contains "UBoot" -or $Target -contains "ATF") {
 
 	& $runtime build @buildArgs --tag $uBootImageName --file u-boot/Dockerfile u-boot || $(throw "Failed to build U-Boot builder using u-boot/Dockerfile.")
 
-	& $runtime run @volumeArgs --name $uBootImageName $uBootImageName || $(throw "Failed to build U-Boot.")
+	& $runtime run --rm @volumeArgs --name $uBootImageName $uBootImageName || $(throw "Failed to build U-Boot.")
 }
 
 # ----------------------------------------
@@ -101,6 +101,7 @@ if ($Target -contains "ATF") {
 	$buildArgs = @()
 	$volumeArgs = @(
 		"-v", "${PWD}/firmware:$WorkDir/firmware"
+		"-v", "${PWD}/atf/bpi-r4.conf:$WorkDir/makeflags"
 	)
 
 	# Handle ATF repository override, if provided
@@ -124,8 +125,7 @@ if ($Target -contains "ATF") {
 
 	& $runtime build @buildArgs --tag $atfImageName --file atf/Dockerfile atf || $(throw "Failed to build ATF builder using atf/Dockerfile.")
 
-	& $runtime run @volumeArgs --rm --name $atfImageName $atfImageName || $(throw "Failed to build ATF.")
+	& $runtime run --rm @volumeArgs --name $atfImageName $atfImageName || $(throw "Failed to build ATF.")
 }
 
 Write-Output "Firmware built successfully."
-Get-ChildItem -Exclude .* firmware

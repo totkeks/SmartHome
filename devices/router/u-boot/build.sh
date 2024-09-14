@@ -4,16 +4,19 @@ set -eu
 
 echo "Starting U-Boot build process..."
 
-echo "Reading additional makeflags..."
-mapfile -t makeflags < <(grep -v '^#' ../makeflags.txt | grep -v '^$')
+echo "Reading build configuration..."
+mapfile -t config_lines < <(grep -vE '^(#|$)' config)
+for line in "${config_lines[@]}"; do
+    export "$line"
+done
 
 cd u-boot
 
-echo "Generating configuration..."
-make mt7988a_bpir4_sd_defconfig
+echo "Generating make configuration..."
+make ${BOARD_DEFCONFIG?"Error: BOARD_DEFCONFIG is not set"}
 
 echo "Building U-Boot..."
-make -j$(nproc) CROSS_COMPILE=aarch64-linux-gnu- "${makeflags[@]}"
+make -j$(nproc)
 
 echo "Copying binary to the firmware directory..."
 cp -v u-boot.bin ../firmware

@@ -13,13 +13,13 @@ uci set network.iot_lan.proto='static'
 uci set network.iot_lan.ipaddr='10.10.30.1'
 uci set network.iot_lan.netmask='255.255.255.0'
 
-uci set wireless.iot=wifi-iface
-uci set wireless.iot.device='radio2g'
-uci set wireless.iot.ssid='${IOT_SSID}'
-uci set wireless.iot.encryption='psk2'
-uci set wireless.iot.key='${IOT_PASSWORD}'
-uci set wireless.iot.network='iot_lan'
-uci set wireless.iot.ocv='0'
+uci set wireless.iot_2g=wifi-iface
+uci set wireless.iot_2g.device='radio2g'
+uci set wireless.iot_2g.ssid='${IOT_SSID}'
+uci set wireless.iot_2g.encryption='psk2'
+uci set wireless.iot_2g.key='${IOT_PASSWORD}'
+uci set wireless.iot_2g.network='iot_lan'
+uci set wireless.iot_2g.ocv='0'
 
 # DHCP server with IPv4 only
 # DHCP with hard-coded macs or at least name:mac mapping?

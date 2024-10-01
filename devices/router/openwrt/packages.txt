@@ -1,1 +1,44 @@
-# Add or remove (prefix with -) packages to the final image
+# Add or remove (prefix with -) packages to/from the final image
+
+# Kernel modules
+kmod-nvme
+
+# Base packages
+ca-bundle
+curl
+ethtool-full
+fish
+htop
+vim
+nmap
+shadow-useradd
+
+# Web management
+luci
+luci-app-statistics
+collectd-mod-thermal
+
+# USB Tethering
+kmod-usb-net-rndis
+kmod-usb-net-cdc-ncm
+
+#collectd
+#collectd-mod-cpu
+#collectd-mod-df
+#collectd-mod-ethstat
+#collectd-mod-hddtemp #missing from opkg
+#collectd-mod-interface
+#collectd-mod-ipstatistics
+#collectd-mod-iptables #needs configuration
+#collectd-mod-load
+#collectd-mod-memory
+#collectd-mod-mmc #missing from opkg
+#collectd-mod-sensors
+#collectd-mod-smart
+#collectd-mod-uptime
+#collectd-mod-thermal
+#collectd-mod-wireless
+#collectd-mod-mqtt
+
+# Containers
+#podman

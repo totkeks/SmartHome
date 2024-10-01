@@ -3,33 +3,21 @@
 	Builds the OpenWrt image for the Banana Pi BPI-R4.
 
 .DESCRIPTION
-	This script builds the router firmware for the Banana Pi BPI-R4 using Docker or Podman. It builds the U-Boot and ARM Trusted Firmware (ATF) binaries, and then packages the firmware image into a compressed archive.
-
-.PARAMETER Target
-	(Mandatory) The target to build. Must be one of "UBoot", "ATF", "OpenWrt".
+	This script builds the router firmware for the Banana Pi BPI-R4 using Docker or Podman. It builds the OpenWrt image either from scratch or using an existing Image Builder.
 
 .PARAMETER RefreshBuilder
 	Refresh the base builder image, even if no changes have been made to the Dockerfile.
 
-.PARAMETER UBootRepository
-	(Optional) The URL or path to an alternate U-Boot repository. If not provided, the default repository as specified in the Dockerfile is used.
+.PARAMETER Repository
+	The URL of the repository to clone the OpenWrt source code from, or the local path to the repository.
 
-	If a URL is provided, the repository is cloned inside the container.
-	If a path is provided, it is mounted inside the container and changes made during the build process are reflected back on the host.
+.PARAMETER Branch
+	The branch of the repository to use for building the OpenWrt image.
 
-.PARAMETER UBootBranch
-	(Optional) The U-Boot branch to checkout. If not provided, the default of the respective repository is used.
+.PARAMETER UseImageBuilder
+	(Optional) Switch to indicate that an existing OpenWrt Image Builder should be used instead of building from scratch.
 
-.PARAMETER ATFRepository
-	(Optional) The URL or path to an alternate ATF repository. If not provided, the default repository as specified in the Dockerfile is used.
-
-	If a URL is provided, the repository is cloned inside the container.
-	If a path is provided, it is mounted inside the container and changes made during the build process are reflected back on the host.
-
-.PARAMETER ATFBranch
-	(Optional) The ATF branch to checkout. If not provided, the default of the respective repository is used.
-
-.PARAMETER imageBuilder
+.PARAMETER ImageBuilder
 	(Optional) The URL or path to an alternate OpenWrt Image Builder. If not provided, the default as specified in the Dockerfile is used.
 #>
 
@@ -72,8 +60,7 @@ if ($RefreshBuilder) {
 $buildArgs = @()
 $volumeArgs = @(
 	"-v", "${PWD}/firmware:$WorkDir/firmware",
-	"-v", "${PWD}/openwrt/files:$WorkDir/files"
-	"-v", "${PWD}/openwrt/packages.txt:$WorkDir/packages.txt"
+	"-v", "${PWD}/.env:$WorkDir/.env:ro"
 )
 
 switch ($PSCmdlet.ParameterSetName) {
@@ -113,4 +100,3 @@ switch ($PSCmdlet.ParameterSetName) {
 & $runtime run @volumeArgs --rm --name $imageName $imageName || $(throw "Failed to build OpenWrt.")
 
 Write-Output "Firmware built successfully."
-Get-ChildItem -Exclude .* firmware

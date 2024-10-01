@@ -1,0 +1,13 @@
+#!/bin/sh -eux
+
+exec >> /root/uci-defaults.log 2>&1
+
+uci set system.@system[0].hostname='router'
+uci set system.@system[0].timezone='CET-1CEST,M3.5.0,M10.5.0/3'
+uci set system.@system[0].zonename='Europe/Berlin'
+
+uci commit system
+
+# Set root password
+set +x
+echo -e "${ROOT_PASSWORD}\n${ROOT_PASSWORD}" | passwd root

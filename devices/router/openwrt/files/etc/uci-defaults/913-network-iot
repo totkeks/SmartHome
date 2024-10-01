@@ -1,0 +1,46 @@
+#!/bin/sh -eux
+
+exec >> /root/uci-defaults.log 2>&1
+
+# IoT LAN (wired and wireless)
+uci set network.iot_bridge=device
+uci set network.iot_bridge.type='bridge'
+uci add_list network.iot_bridge.ports='wan'
+
+uci set network.iot_lan=interface
+uci set network.iot_lan.device='iot_bridge'
+uci set network.iot_lan.proto='static'
+uci set network.iot_lan.ipaddr='10.10.30.1'
+uci set network.iot_lan.netmask='255.255.255.0'
+
+uci set wireless.iot=wifi-iface
+uci set wireless.iot.device='radio2g'
+uci set wireless.iot.ssid='${IOT_SSID}'
+uci set wireless.iot.encryption='psk2'
+uci set wireless.iot.key='${IOT_PASSWORD}'
+uci set wireless.iot.network='iot_lan'
+uci set wireless.iot.ocv='0'
+
+# DHCP server with IPv4 only
+# DHCP with hard-coded macs or at least name:mac mapping?
+uci set dhcp.iot=dhcp
+uci set dhcp.iot.interface='iot_lan'
+uci set dhcp.iot.start='100'
+uci set dhcp.iot.limit='150'
+uci set dhcp.iot.leasetime='24h'
+uci set dhcp.iot.dhcpv4='server'
+
+# Firewall zone with limited access
+uci set firewall.iot='zone'
+uci set firewall.iot.name='iot'
+uci set firewall.iot.network='iot_lan'
+uci set firewall.iot.input='REJECT'
+uci set firewall.iot.output='ACCEPT'
+uci set firewall.iot.forward='REJECT'
+
+# Allow traffic to the world
+uci set firewall.iot_wan='forwarding'
+uci set firewall.iot_wan.src='iot'
+uci set firewall.iot_wan.dest='wan'
+
+uci commit

@@ -1,0 +1,89 @@
+#!/bin/sh -eux
+
+# These are the physical network devices
+# eth0 Internal switch
+# eth1 SFP2 'LAN'
+# eth2 SFP1 'WAN'
+#
+# And on the switch there are 4 ports from SFP to power supply
+# wan, lan1, lan2, lan3
+#
+# These are the wireless devices
+# radio0 2.4GHz
+# radio1 5GHz
+# radio2 6GHz
+
+exec >> /root/uci-defaults.log 2>&1
+
+# Clear existing configuration
+uci delete network.lan
+uci delete network.wan
+uci delete network.wan6
+while uci -q delete network.@device[0]; do :; done
+uci delete dhcp.lan
+uci delete dhcp.wan
+
+# External WAN and WAN6 over SFP1
+uci set network.fiber_wan=interface
+uci set network.fiber_wan.proto='dhcp'
+uci set network.fiber_wan.device='eth2'
+uci set network.fiber_wan.dns='1.1.1.1 1.0.0.1'
+uci set network.fiber_wan.peerdns='0'
+
+uci set network.fiber_wan6=interface
+uci set network.fiber_wan6.proto='dhcpv6'
+uci set network.fiber_wan6.device='eth2'
+uci set network.fiber_wan6.dns='2606:4700:4700::1111 2606:4700:4700::1001'
+uci set network.fiber_wan6.peerdns='0'
+
+# External WAN and WAN6 over USB tethering
+uci set network.tethering_wan=interface
+uci set network.tethering_wan.proto='dhcp'
+uci set network.tethering_wan.device='usb0'
+uci set network.tethering_wan.dns='1.1.1.1 1.0.0.1'
+uci set network.tethering_wan.peerdns='0'
+
+uci set network.tethering_wan6=interface
+uci set network.tethering_wan6.proto='dhcpv6'
+uci set network.tethering_wan6.device='usb0'
+uci set network.tethering_wan6.dns='2606:4700:4700::1111 2606:4700:4700::1001'
+uci set network.tethering_wan6.reqaddress='try'
+uci set network.tethering_wan6.reqprefix='auto'
+uci set network.tethering_wan6.peerdns='0'
+
+# Delete existing configuration
+while uci -q delete firewall.@zone[0]; do :; done
+while uci -q delete firewall.@forwarding[0]; do :; done
+#while uci -q delete firewall.@rule[0]; do :; done
+
+# WAN zone
+uci set firewall.wan='zone'
+uci set firewall.wan.name='wan'
+uci set firewall.wan.network='fiber_wan fiber_wan6 tethering_wan tethering_wan6'
+uci set firewall.wan.input='REJECT'
+uci set firewall.wan.output='ACCEPT'
+uci set firewall.wan.forward='REJECT'
+uci set firewall.wan.masq='1'
+uci set firewall.wan.mtu_fix='1'
+
+# Wireless configuration
+uci delete wireless.default_radio0
+uci delete wireless.default_radio1
+uci delete wireless.default_radio2
+
+uci rename wireless.radio0=radio2g
+uci set wireless.radio2g.country='DE'
+uci set wireless.radio2g.channel='auto'
+uci set wireless.radio2g.disabled='0'
+
+uci rename wireless.radio1=radio5g
+uci set wireless.radio5g.country='DE'
+uci set wireless.radio5g.channel='auto'
+uci set wireless.radio5g.disabled='0'
+
+uci rename wireless.radio2=radio6g
+uci set wireless.radio6g.country='DE'
+uci set wireless.radio6g.channel='auto'
+uci set wireless.radio6g.disabled='0'
+
+uci commit

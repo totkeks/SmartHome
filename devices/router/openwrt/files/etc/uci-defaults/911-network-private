@@ -1,0 +1,66 @@
+#!/bin/sh -eux
+
+exec >> /root/uci-defaults.log 2>&1
+
+# Private LAN (wired and wireless)
+uci set network.private_bridge=device
+uci set network.private_bridge.name='br-private'
+uci set network.private_bridge.type='bridge'
+uci set network.private_bridge.ports='lan1 lan2 lan3'
+
+uci set network.private_lan=interface
+uci set network.private_lan.device='br-private'
+uci set network.private_lan.proto='static'
+uci set network.private_lan.ipaddr='10.10.10.1'
+uci set network.private_lan.netmask='255.255.255.0'
+uci set network.private_lan.ip6assign='60'
+
+uci set wireless.private_5g=wifi-iface
+uci set wireless.private_5g.device='radio5g'
+uci set wireless.private_5g.mode='ap'
+uci set wireless.private_5g.ssid='${PRIVATE_SSID}'
+uci set wireless.private_5g.encryption='sae'
+uci set wireless.private_5g.key='${PRIVATE_PASSWORD}'
+uci set wireless.private_5g.network='private_lan'
+uci set wireless.private_5g.ocv='0'
+
+uci set wireless.private_6g=wifi-iface
+uci set wireless.private_6g.device='radio6g'
+uci set wireless.private_6g.mode='ap'
+uci set wireless.private_6g.ssid='${PRIVATE_SSID}'
+uci set wireless.private_6g.encryption='sae'
+uci set wireless.private_6g.key='${PRIVATE_PASSWORD}'
+uci set wireless.private_6g.network='private_lan'
+uci set wireless.private_6g.ocv='0'
+
+# DHCP server for all clients with long lease time
+uci set dhcp.private=dhcp
+uci set dhcp.private.interface='private_lan'
+uci set dhcp.private.start='50'
+uci set dhcp.private.limit='50'
+uci set dhcp.private.leasetime='12h'
+uci set dhcp.private.dhcpv4='server'
+uci set dhcp.private.dhcpv6='server'
+uci set dhcp.private.ra='server'
+uci set dhcp.private.ra_slaac='1'
+uci set dhcp.private.ra_flags='managed-config other-config'
+
+# Firewall zone with free access
+uci set firewall.private='zone'
+uci set firewall.private.name='private'
+uci set firewall.private.network='private_lan'
+uci set firewall.private.input='ACCEPT'
+uci set firewall.private.output='ACCEPT'
+uci set firewall.private.forward='ACCEPT'
+
+# Allow traffic to the world
+uci set firewall.private_wan='forwarding'
+uci set firewall.private_wan.src='private'
+uci set firewall.private_wan.dest='wan'
+
+# Allow traffic to the IoT network
+uci set firewall.private_iot='forwarding'
+uci set firewall.private_iot.src='private'
+uci set firewall.private_iot.dest='iot'
+
+uci commit

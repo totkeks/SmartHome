@@ -1,0 +1,60 @@
+#!/bin/sh -eux
+
+exec >> /root/uci-defaults.log 2>&1
+
+# Guest LAN (wireless only)
+uci set network.guest_bridge=device
+uci set network.guest_bridge.name='br-guest'
+uci set network.guest_bridge.type='bridge'
+
+uci set network.guest_lan=interface
+uci set network.guest_lan.device='br-guest'
+uci set network.guest_lan.proto='static'
+uci set network.guest_lan.ipaddr='10.10.20.1'
+uci set network.guest_lan.netmask='255.255.255.0'
+uci set network.guest_lan.ip6assign='60'
+
+uci set wireless.guest_5g=wifi-iface
+uci set wireless.guest_5g.device='radio5g'
+uci set wireless.guest_5g.mode='ap'
+uci set wireless.guest_5g.ssid='${GUEST_SSID}'
+uci set wireless.guest_5g.encryption='sae'
+uci set wireless.guest_5g.key='${GUEST_PASSWORD}'
+uci set wireless.guest_5g.network='guest_lan'
+uci set wireless.guest_5g.ocv='0'
+
+uci set wireless.guest_6g=wifi-iface
+uci set wireless.guest_6g.device='radio6g'
+uci set wireless.guest_6g.mode='ap'
+uci set wireless.guest_6g.ssid='${GUEST_SSID}'
+uci set wireless.guest_6g.encryption='sae'
+uci set wireless.guest_6g.key='${GUEST_PASSWORD}'
+uci set wireless.guest_6g.network='guest_lan'
+uci set wireless.guest_6g.ocv='0'
+
+# DHCP server for all clients with short lease time
+uci set dhcp.guest=dhcp
+uci set dhcp.guest.interface='guest_lan'
+uci set dhcp.guest.start='100'
+uci set dhcp.guest.limit='10'
+uci set dhcp.guest.leasetime='1h'
+uci set dhcp.guest.dhcpv4='server'
+uci set dhcp.guest.dhcpv6='server'
+uci set dhcp.guest.ra='server'
+uci set dhcp.guest.ra_slaac='1'
+uci set dhcp.guest.ra_flags='managed-config other-config'
+
+# Firewall zone with limited access
+uci set firewall.guest='zone'
+uci set firewall.guest.name='guest'
+uci set firewall.guest.network='guest_lan'
+uci set firewall.guest.input='REJECT'
+uci set firewall.guest.output='ACCEPT'
+uci set firewall.guest.forward='REJECT'
+
+# Allow traffic to the world
+uci set firewall.guest_wan='forwarding'
+uci set firewall.guest_wan.src='guest'
+uci set firewall.guest_wan.dest='wan'
+
+uci commit

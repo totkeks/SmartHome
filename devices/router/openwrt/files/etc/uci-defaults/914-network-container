@@ -1,0 +1,15 @@
+#!/bin/sh -eux
+
+# exec >> /root/uci-defaults.log 2>&1
+
+# Container LAN (virtual only)
+# uci set network.container_bridge=interface
+# uci set network.container_bridge='bridge'
+
+# uci set network.container_lan=interface
+# uci set network.container_lan.device='br-container'
+# uci set network.container_lan.proto='static'
+# uci set network.container_lan.ipaddr='10.10.40.1'
+# uci set network.container_lan.netmask='255.255.255.0'
+
+# uci commit

@@ -6,7 +6,11 @@ echo "Starting OpenWrt build process..."
 
 # Replace environment variables in configuration files
 (
-    export $(grep -vE '^(#|$)' .env | xargs)
+	mapfile -t env_vars < <(grep -vE '^(#|$)' .env)
+	for var in "${env_vars[@]}"; do
+		export "$var"
+	done
+
 	for file in ./files/etc/uci-defaults/*; do
 		envsubst < "$file" | sponge "$file"
 	done

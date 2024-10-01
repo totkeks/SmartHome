@@ -14,9 +14,11 @@ RUN apt-get update \
 	flex \
 	gawk \
 	gcc-aarch64-linux-gnu \
+	gettext-base \
 	git \
 	libssl-dev \
 	make \
+	moreutils \
 	python3-distutils \
 	unzip \
 	wget \

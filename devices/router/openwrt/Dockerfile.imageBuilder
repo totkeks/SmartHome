@@ -11,8 +11,9 @@ COPY packages.txt .
 COPY build.imageBuilder.sh build.sh
 
 RUN chmod +x build.sh \
-    && find files/ -type d -exec chmod 755 {} \;
+    && find files/ -type d -exec chmod 755 {} \; \
     && find files/etc/uci-defaults/ -type f -exec chmod 755 {} \; \
-    && chmod 755 files/etc/rc.local
+    && chmod 755 files/etc/rc.local \
+    && chmod 644 files/root/.profile
 
 CMD ["./build.sh"]

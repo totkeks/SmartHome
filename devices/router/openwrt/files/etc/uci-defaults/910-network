@@ -36,6 +36,13 @@ uci set network.fiber_wan6.proto='dhcpv6'
 uci set network.fiber_wan6.dns='2606:4700:4700::1111 2606:4700:4700::1001'
 uci set network.fiber_wan6.peerdns='0'
 
+# Access to the SFP module's web interface
+uci set network.fiber_ont=interface
+uci set network.fiber_ont.device='eth2'
+uci set network.fiber_ont.proto='static'
+uci set network.fiber_ont.ipaddr='192.168.0.2'
+uci set network.fiber_ont.netmask='255.255.255.0'
+
 # External WAN and WAN6 over USB tethering
 uci set network.tethering_wan=interface
 uci set network.tethering_wan.device='usb0'

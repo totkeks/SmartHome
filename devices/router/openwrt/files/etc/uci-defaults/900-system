@@ -8,6 +8,13 @@ uci set system.@system[0].zonename='Europe/Berlin'
 
 uci commit system
 
-# Set root password
+# Setup root user
 set +x
 echo -e "${ROOT_PASSWORD}\n${ROOT_PASSWORD}" | passwd root
+
+echo "${SSH_PUBLIC_KEY}" > /etc/dropbear/authorized_keys
+chmod 600 /etc/dropbear/authorized_keys
+
+uci set dropbear.@dropbear[0].PasswordAuth='off'
+uci set dropbear.@dropbear[0].RootPasswordAuth='off'
+uci commit dropbear

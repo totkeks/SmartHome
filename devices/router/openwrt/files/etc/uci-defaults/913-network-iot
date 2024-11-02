@@ -4,17 +4,19 @@ exec >> /root/uci-defaults.log 2>&1
 
 # IoT LAN (wired and wireless)
 uci set network.iot_bridge=device
+uci set network.iot_bridge.name='br-iot'
 uci set network.iot_bridge.type='bridge'
-uci add_list network.iot_bridge.ports='wan'
+uci set network.iot_bridge.ports='wan'
 
 uci set network.iot_lan=interface
-uci set network.iot_lan.device='iot_bridge'
+uci set network.iot_lan.device='br-iot'
 uci set network.iot_lan.proto='static'
 uci set network.iot_lan.ipaddr='10.10.30.1'
 uci set network.iot_lan.netmask='255.255.255.0'
 
 uci set wireless.iot_2g=wifi-iface
 uci set wireless.iot_2g.device='radio2g'
+uci set wireless.iot_2g.mode='ap'
 uci set wireless.iot_2g.ssid='${IOT_SSID}'
 uci set wireless.iot_2g.encryption='psk2'
 uci set wireless.iot_2g.key='${IOT_PASSWORD}'
@@ -26,7 +28,7 @@ uci set wireless.iot_2g.ocv='0'
 uci set dhcp.iot=dhcp
 uci set dhcp.iot.interface='iot_lan'
 uci set dhcp.iot.start='100'
-uci set dhcp.iot.limit='150'
+uci set dhcp.iot.limit='10'
 uci set dhcp.iot.leasetime='24h'
 uci set dhcp.iot.dhcpv4='server'
 

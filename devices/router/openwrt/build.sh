@@ -4,14 +4,27 @@ set -eu
 
 echo "Starting OpenWrt build process..."
 
+# Replace environment variables in configuration files
+(
+	mapfile -t env_vars < <(grep -vE '^(#|$)' .env)
+	for var in "${env_vars[@]}"; do
+		export "$var"
+	done
+
+	for file in ./files/etc/uci-defaults/*; do
+		envsubst < "$file" | sponge "$file"
+	done
+)
+
 cd imagebuilder
 
 echo "Building OpenWrt..."
 make -j$(nproc) image \
 	PROFILE=bananapi_bpi-r4 \
-	FILES=../files \
-	#BIN_DIR="../firmware" \ # this is bugged currently and doesn't work
-	PACKAGES=$(grep -v '^#' ../packages.txt | grep -v '^$' | tr '\n' ' ')
+	ROOTFS_PARTSIZE=1024 \
+	PACKAGES="$(grep -vE '^(#|$)' ../packages.txt | tr '\n' ' ')" \
+	FILES=../files
+	#BIN_DIR="../firmware" # this is bugged currently and doesn't work
 
 echo "Copying files to the firmware directory..."
 prefix=$(basename $(find bin -type f -name '*.manifest') .manifest)

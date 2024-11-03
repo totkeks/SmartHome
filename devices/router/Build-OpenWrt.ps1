@@ -12,7 +12,7 @@
 
 [CmdletBinding()]
 param (
-	[string]$ImageBuilder
+	[string]$ImageBuilder = "https://downloads.openwrt.org/snapshots/targets/mediatek/filogic/openwrt-imagebuilder-mediatek-filogic.Linux-x86_64.tar.zst"
 )
 
 Set-Variable -Option Constant BuilderImageName "router-firmware-builder"
@@ -23,15 +23,13 @@ $runtime = if (Get-Command podman -ErrorAction SilentlyContinue) { "podman" } `
 	elseif (Get-Command docker -ErrorAction SilentlyContinue) { "docker" } `
 	else { throw "Neither podman nor docker could be found." }
 
-$buildArgs = @()
+$buildArgs = @(
+	"--build-arg", "IMAGE_BUILDER=$ImageBuilder"
+)
 $volumeArgs = @(
 	"-v", "${PWD}/firmware:$WorkDir/firmware",
 	"-v", "${PWD}/.env:$WorkDir/.env:ro"
 )
-
-if ($ImageBuilder) {
-	$buildArgs += "--build-arg", "IMAGE_BUILDER=$ImageBuilder"
-}
 
 $imageName = "$BuilderImageName-openwrt"
 & $runtime build @buildArgs --tag $imageName --file "openwrt/Dockerfile" openwrt || $(throw "Failed to build OpenWrt builder.")

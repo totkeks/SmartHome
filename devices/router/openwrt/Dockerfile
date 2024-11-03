@@ -1,6 +1,6 @@
 FROM router-firmware-builder
 
-ARG IMAGE_BUILDER=https://downloads.openwrt.org/snapshots/targets/mediatek/filogic/openwrt-imagebuilder-mediatek-filogic.Linux-x86_64.tar.zst
+ARG IMAGE_BUILDER
 
 RUN mkdir imagebuilder \
     && wget -q --show-progress --progress=bar:force -O- ${IMAGE_BUILDER} \

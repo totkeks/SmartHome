@@ -1,8 +1,10 @@
 FROM router-firmware-builder
 
 ARG IMAGE_BUILDER
+ARG OPENWRT_REVISION
 
-RUN mkdir imagebuilder \
+RUN OPENWRT_REVISION=${OPENWRT_REVISION} \
+    && mkdir imagebuilder \
     && wget -q --show-progress --progress=bar:force -O- ${IMAGE_BUILDER} \
     | tar --zstd -x --strip-components=1 -C imagebuilder
 

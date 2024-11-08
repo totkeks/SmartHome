@@ -43,6 +43,7 @@ New-Item -ItemType Directory -Force -Path $firmwareDir | Out-Null
 
 & $runtime build `
 	--build-arg IMAGE_BUILDER=$ImageBuilder `
+	--build-arg OPENWRT_REVISION=$revision `
 	--tag "${ImageName}:$revision" `
 	--label "org.openwrt.commit=$gitHash" `
 	--file "openwrt/Dockerfile" `

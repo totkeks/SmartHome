@@ -23,15 +23,24 @@ while uci -q delete network.@device[0]; do :; done
 uci delete dhcp.lan
 uci delete dhcp.wan
 
-# External WAN and WAN6 over SFP1
+# External WAN and WAN6 over SFP1 using PPPoE and VLAN 7
+uci set network.fiber_vlan=device
+uci set network.fiber_vlan.type='8021q'
+uci set network.fiber_vlan.ifname='eth2'
+uci set network.fiber_vlan.vid='7'
+uci set network.fiber_vlan.name='eth2.7'
+
 uci set network.fiber_wan=interface
-uci set network.fiber_wan.device='eth2'
-uci set network.fiber_wan.proto='dhcp'
+uci set network.fiber_wan.device='eth2.7'
+uci set network.fiber_wan.proto='pppoe'
+uci set network.fiber_wan.username='${PPPOE_USERNAME}'
+uci set network.fiber_wan.password='${PPPOE_PASSWORD}'
 uci set network.fiber_wan.dns='1.1.1.1 1.0.0.1'
 uci set network.fiber_wan.peerdns='0'
+uci set network.fiber_wan.ipv6='1'
 
 uci set network.fiber_wan6=interface
-uci set network.fiber_wan6.device='eth2'
+uci set network.fiber_wan6.device='pppoe-fiber_wan'
 uci set network.fiber_wan6.proto='dhcpv6'
 uci set network.fiber_wan6.dns='2606:4700:4700::1111 2606:4700:4700::1001'
 uci set network.fiber_wan6.peerdns='0'
@@ -66,7 +75,7 @@ while uci -q delete firewall.@forwarding[0]; do :; done
 # WAN zone
 uci set firewall.wan='zone'
 uci set firewall.wan.name='wan'
-uci set firewall.wan.network='fiber_wan fiber_wan6 tethering_wan tethering_wan6'
+uci set firewall.wan.network='fiber_wan fiber_wan6 fiber_ont tethering_wan tethering_wan6'
 uci set firewall.wan.input='REJECT'
 uci set firewall.wan.output='ACCEPT'
 uci set firewall.wan.forward='REJECT'

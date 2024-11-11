@@ -40,7 +40,7 @@ uci set network.fiber_wan.peerdns='0'
 uci set network.fiber_wan.ipv6='1'
 
 uci set network.fiber_wan6=interface
-uci set network.fiber_wan6.device='pppoe-fiber_wan'
+uci set network.fiber_wan6.device='@fiber_wan'
 uci set network.fiber_wan6.proto='dhcpv6'
 uci set network.fiber_wan6.dns='2606:4700:4700::1111 2606:4700:4700::1001'
 uci set network.fiber_wan6.peerdns='0'

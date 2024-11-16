@@ -22,6 +22,9 @@ uci delete network.wan6
 while uci -q delete network.@device[0]; do :; done
 uci delete dhcp.lan
 uci delete dhcp.wan
+while uci -q delete firewall.@zone[0]; do :; done
+while uci -q delete firewall.@forwarding[0]; do :; done
+while uci -q delete firewall.@rule[0]; do :; done
 
 # External WAN and WAN6 over SFP1 using PPPoE and VLAN 7
 uci set network.fiber_vlan=device
@@ -67,11 +70,6 @@ uci set network.tethering_wan6.reqaddress='try'
 uci set network.tethering_wan6.reqprefix='auto'
 uci set network.tethering_wan6.peerdns='0'
 
-# Delete existing configuration
-while uci -q delete firewall.@zone[0]; do :; done
-while uci -q delete firewall.@forwarding[0]; do :; done
-#while uci -q delete firewall.@rule[0]; do :; done
-
 # WAN zone
 uci set firewall.wan='zone'
 uci set firewall.wan.name='wan'
@@ -82,7 +80,79 @@ uci set firewall.wan.forward='REJECT'
 uci set firewall.wan.masq='1'
 uci set firewall.wan.mtu_fix='1'
 
-# Wireless configuration
+# Enable flow offloading to improve performance
+uci set firewall.@defaults[0].flow_offloading='1'
+uci set firewall.@defaults[0].flow_offloading_hw='1'
+
+### Firewall rules ###
+# Allow DHCP renewal for IPv4
+uci set firewall.allow_dhcp_renew='rule'
+uci set firewall.allow_dhcp_renew.name='Allow-DHCP-Renew'
+uci set firewall.allow_dhcp_renew.src='wan'
+uci set firewall.allow_dhcp_renew.proto='udp'
+uci set firewall.allow_dhcp_renew.dest_port='68'
+uci set firewall.allow_dhcp_renew.family='ipv4'
+uci set firewall.allow_dhcp_renew.target='ACCEPT'
+
+# Allow DHCP renewal for IPv6
+uci set firewall.allow_dhcpv6='rule'
+uci set firewall.allow_dhcpv6.name='Allow-DHCPv6'
+uci set firewall.allow_dhcpv6.src='wan'
+uci set firewall.allow_dhcpv6.proto='udp'
+uci set firewall.allow_dhcpv6.dest_port='546'
+uci set firewall.allow_dhcpv6.family='ipv6'
+uci set firewall.allow_dhcpv6.target='ACCEPT'
+
+# Allow IPv4 ping
+uci set firewall.allow_ping='rule'
+uci set firewall.allow_ping.name='Allow-Ping'
+uci set firewall.allow_ping.src='wan'
+uci set firewall.allow_ping.proto='icmp'
+uci set firewall.allow_ping.icmp_type='echo-request'
+uci set firewall.allow_ping.family='ipv4'
+uci set firewall.allow_ping.target='ACCEPT'
+uci set firewall.allow_ping.limit='10/sec'
+
+# Allow ICMPv6 input (essential for IPv6 functionality)
+uci set firewall.allow_icmpv6_input='rule'
+uci set firewall.allow_icmpv6_input.name='Allow-ICMPv6-Input'
+uci set firewall.allow_icmpv6_input.src='wan'
+uci set firewall.allow_icmpv6_input.proto='icmp'
+uci set firewall.allow_icmpv6_input.icmp_type='echo-request echo-reply destination-unreachable packet-too-big time-exceeded bad-header unknown-header-type router-solicitation neighbour-solicitation router-advertisement neighbour-advertisement'
+uci set firewall.allow_icmpv6_input.limit='1000/sec'
+uci set firewall.allow_icmpv6_input.family='ipv6'
+uci set firewall.allow_icmpv6_input.target='ACCEPT'
+
+# Allow ICMPv6 forward (essential for IPv6 functionality)
+uci set firewall.allow_icmpv6_forward='rule'
+uci set firewall.allow_icmpv6_forward.name='Allow-ICMPv6-Forward'
+uci set firewall.allow_icmpv6_forward.src='wan'
+uci set firewall.allow_icmpv6_forward.dest='*'
+uci set firewall.allow_icmpv6_forward.proto='icmp'
+uci set firewall.allow_icmpv6_forward.icmp_type='echo-request echo-reply destination-unreachable packet-too-big time-exceeded bad-header unknown-header-type'
+uci set firewall.allow_icmpv6_forward.limit='1000/sec'
+uci set firewall.allow_icmpv6_forward.family='ipv6'
+uci set firewall.allow_icmpv6_forward.target='ACCEPT'
+
+# Allow IGMP for IPv4 multicast (like IPTV)
+uci set firewall.allow_igmp='rule'
+uci set firewall.allow_igmp.name='Allow-IGMP'
+uci set firewall.allow_igmp.src='wan'
+uci set firewall.allow_igmp.proto='igmp'
+uci set firewall.allow_igmp.family='ipv4'
+uci set firewall.allow_igmp.target='ACCEPT'
+
+# Allow MLD for IPv6 multicast (like IPTV)
+uci set firewall.allow_mld='rule'
+uci set firewall.allow_mld.name='Allow-MLD'
+uci set firewall.allow_mld.src='wan'
+uci set firewall.allow_mld.proto='icmp'
+uci set firewall.allow_mld.src_ip='fe80::/10'
+uci set firewall.allow_mld.icmp_type='130/0 131/0 132/0 143/0'
+uci set firewall.allow_mld.family='ipv6'
+uci set firewall.allow_mld.target='ACCEPT'
+
+### Wireless configuration ###
 uci delete wireless.default_radio0
 uci delete wireless.default_radio1
 uci delete wireless.default_radio2

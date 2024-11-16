@@ -28,7 +28,7 @@ uci set wireless.iot_2g.ocv='0'
 uci set dhcp.iot=dhcp
 uci set dhcp.iot.interface='iot_lan'
 uci set dhcp.iot.start='100'
-uci set dhcp.iot.limit='10'
+uci set dhcp.iot.limit='50'
 uci set dhcp.iot.leasetime='24h'
 uci set dhcp.iot.dhcpv4='server'
 

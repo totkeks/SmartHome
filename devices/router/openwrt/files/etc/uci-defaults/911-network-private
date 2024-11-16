@@ -36,7 +36,7 @@ uci set wireless.private_6g.ocv='0'
 # DHCP server for all clients with long lease time
 uci set dhcp.private=dhcp
 uci set dhcp.private.interface='private_lan'
-uci set dhcp.private.start='50'
+uci set dhcp.private.start='100'
 uci set dhcp.private.limit='50'
 uci set dhcp.private.leasetime='12h'
 uci set dhcp.private.dhcpv4='server'

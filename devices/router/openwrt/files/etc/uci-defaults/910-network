@@ -164,6 +164,7 @@ uci set wireless.radio2g.disabled='0'
 
 uci rename wireless.radio1=radio5g
 uci set wireless.radio5g.country='DE'
+uci set wireless.radio5g.channels='36-64 100-140'
 uci set wireless.radio5g.channel='auto'
 uci set wireless.radio5g.disabled='0'
 

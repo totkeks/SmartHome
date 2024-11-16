@@ -21,6 +21,7 @@ uci set wireless.iot_2g.ssid='${IOT_SSID}'
 uci set wireless.iot_2g.encryption='psk2'
 uci set wireless.iot_2g.key='${IOT_PASSWORD}'
 uci set wireless.iot_2g.network='iot_lan'
+uci set wireless.iot_2g.isolate='1'
 uci set wireless.iot_2g.ocv='0'
 
 # DHCP server with IPv4 only

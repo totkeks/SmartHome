@@ -157,20 +157,28 @@ uci delete wireless.default_radio0
 uci delete wireless.default_radio1
 uci delete wireless.default_radio2
 
+# 2.4Ghz, Wifi 7, 20Mhz
 uci rename wireless.radio0=radio2g
 uci set wireless.radio2g.country='DE'
 uci set wireless.radio2g.channel='auto'
+uci set wireless.radio2g.htmode='EHT20'
 uci set wireless.radio2g.disabled='0'
 
+# 5Ghz, Wifi 7, 40Mhz
+# Restrict to UNII-1 (36-64) & UNII-2 Extended (100-136) for legacy device support
+# Excluding channel 140 to avoid selecting channel 144
 uci rename wireless.radio1=radio5g
 uci set wireless.radio5g.country='DE'
-uci set wireless.radio5g.channels='36-64 100-140'
+uci set wireless.radio5g.channels='36-64 100-136'
 uci set wireless.radio5g.channel='auto'
+uci set wireless.radio5g.htmode='EHT40'
 uci set wireless.radio5g.disabled='0'
 
+# 6Ghz, Wifi 7, 80Mhz
 uci rename wireless.radio2=radio6g
 uci set wireless.radio6g.country='DE'
 uci set wireless.radio6g.channel='auto'
+uci set wireless.radio6g.htmode='EHT80'
 uci set wireless.radio6g.disabled='0'
 
 uci commit

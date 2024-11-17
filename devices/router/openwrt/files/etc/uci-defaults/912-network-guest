@@ -1,5 +1,6 @@
-#!/bin/sh -eux
+#!/bin/sh
 
+set -eux
 exec >> /root/uci-defaults.log 2>&1
 
 # Guest LAN (wireless only)

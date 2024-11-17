@@ -1,12 +1,11 @@
-#!/bin/sh -eux
+#!/bin/sh
 
+set -eux
 exec >> /root/uci-defaults.log 2>&1
 
 uci set system.@system[0].hostname='router'
 uci set system.@system[0].timezone='CET-1CEST,M3.5.0,M10.5.0/3'
 uci set system.@system[0].zonename='Europe/Berlin'
-
-uci commit system
 
 # Setup root user
 set +x
@@ -14,7 +13,9 @@ echo -e "${ROOT_PASSWORD}\n${ROOT_PASSWORD}" | passwd root
 
 echo "${SSH_PUBLIC_KEY}" > /etc/dropbear/authorized_keys
 chmod 600 /etc/dropbear/authorized_keys
+set -x
 
 uci set dropbear.@dropbear[0].PasswordAuth='off'
 uci set dropbear.@dropbear[0].RootPasswordAuth='off'
-uci commit dropbear
+
+uci commit

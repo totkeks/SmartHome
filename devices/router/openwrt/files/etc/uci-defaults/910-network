@@ -1,4 +1,4 @@
-#!/bin/sh -eux
+#!/bin/sh
 
 # These are the physical network devices
 # eth0 Internal switch
@@ -13,6 +13,7 @@
 # radio1 5GHz
 # radio2 6GHz
 
+set -eux
 exec >> /root/uci-defaults.log 2>&1
 
 # Clear existing configuration

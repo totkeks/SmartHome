@@ -35,7 +35,7 @@ uci set wireless.guest_6g.network='guest_lan'
 uci set wireless.guest_6g.isolate='1'
 uci set wireless.guest_6g.ocv='0'
 
-# DHCP server for all clients with short lease time
+# DHCP server with IPv4 and IPv6
 uci set dhcp.guest=dhcp
 uci set dhcp.guest.interface='guest_lan'
 uci set dhcp.guest.start='100'

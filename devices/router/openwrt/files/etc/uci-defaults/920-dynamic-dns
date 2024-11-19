@@ -1,0 +1,40 @@
+#!/bin/sh
+
+set -eux
+exec >> /root/uci-defaults.log 2>&1
+
+# Remove default configuration
+uci delete ddns.myddns_ipv4
+uci delete ddns.myddns_ipv6
+
+# IPv4 Configuration
+uci set ddns.cloudflare_ipv4=service
+uci set ddns.cloudflare_ipv4.service_name='cloudflare.com-v4'
+uci set ddns.cloudflare_ipv4.enabled='1'
+uci set ddns.cloudflare_ipv4.lookup_host='${DOMAIN}'
+uci set ddns.cloudflare_ipv4.domain='${DDNS_RECORD}'
+uci set ddns.cloudflare_ipv4.username=Bearer
+uci set ddns.cloudflare_ipv4.password='${CLOUDFLARE_API_TOKEN}'
+uci set ddns.cloudflare_ipv4.use_ipv6='0'
+uci set ddns.cloudflare_ipv4.interface='fiber_wan'
+uci set ddns.cloudflare_ipv4.ip_source='network'
+uci set ddns.cloudflare_ipv4.ip_network='fiber_wan'
+uci set ddns.cloudflare_ipv4.use_https='1'
+
+# IPv6 Configuration
+uci set ddns.cloudflare_ipv6=service
+uci set ddns.cloudflare_ipv6.service_name='cloudflare.com-v4'
+uci set ddns.cloudflare_ipv6.enabled='1'
+uci set ddns.cloudflare_ipv6.lookup_host='${DOMAIN}'
+uci set ddns.cloudflare_ipv6.domain='${DDNS_RECORD}'
+uci set ddns.cloudflare_ipv6.username=Bearer
+uci set ddns.cloudflare_ipv6.password='${CLOUDFLARE_API_TOKEN}'
+uci set ddns.cloudflare_ipv6.use_ipv6='1'
+uci set ddns.cloudflare_ipv6.interface='fiber_wan6'
+uci set ddns.cloudflare_ipv6.ip_source='network'
+uci set ddns.cloudflare_ipv6.ip_network='fiber_wan6'
+uci set ddns.cloudflare_ipv6.use_https='1'
+
+uci commit ddns
+/etc/init.d/ddns enable
+/etc/init.d/ddns start

@@ -11,6 +11,8 @@ echo "Starting OpenWrt build process..."
 		export "$var"
 	done
 
+	export ROOT_PASSWORD_HASH=$(openssl passwd -5 "$ROOT_PASSWORD")
+
 	for file in ./files/etc/uci-defaults/*; do
 		envsubst < "$file" | sponge "$file"
 	done

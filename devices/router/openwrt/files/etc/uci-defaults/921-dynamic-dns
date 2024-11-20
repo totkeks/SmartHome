@@ -38,5 +38,3 @@ uci set ddns.cloudflare_ipv6.use_https='1'
 uci set ddns.cloudflare_ipv6.dns_server='2606:4700:4700::1111'
 
 uci commit ddns
-/etc/init.d/ddns enable
-/etc/init.d/ddns start

@@ -1,0 +1,18 @@
+#!/bin/sh
+
+set -eux
+exec >> /root/uci-defaults.log 2>&1
+
+# Remove existing interface settings
+uci -q delete dhcp.@dnsmasq[0].interface
+uci -q delete dhcp.@dnsmasq[0].notinterface
+
+# Listen only on the internal interfaces
+uci add_list dhcp.@dnsmasq[0].interface='private_lan'
+uci add_list dhcp.@dnsmasq[0].interface='guest_lan'
+uci add_list dhcp.@dnsmasq[0].interface='iot_lan'
+
+uci set dhcp.@dnsmasq[0].local='/${DOMAIN}/'
+uci set dhcp.@dnsmasq[0].domain='${DOMAIN}'
+
+uci commit dhcp

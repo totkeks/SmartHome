@@ -15,4 +15,8 @@ uci add_list dhcp.@dnsmasq[0].interface='iot_lan'
 uci set dhcp.@dnsmasq[0].local='/${DOMAIN}/'
 uci set dhcp.@dnsmasq[0].domain='${DOMAIN}'
 
+# Enable DNS security via local stubby instance
+uci set dhcp.@dnsmasq[0].noresolv='1'
+uci set dhcp.@dnsmasq[0].server='127.0.0.1#5453'
+
 uci commit dhcp

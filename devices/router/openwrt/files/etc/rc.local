@@ -1,5 +1,2 @@
 # Setup CPU frequency scaling
 echo ondemand > /sys/devices/system/cpu/cpufreq/policy0/scaling_governor
-
-# Disable autonegotiation on SFP module
-ethtool -s eth2 speed 1000 duplex full autoneg off

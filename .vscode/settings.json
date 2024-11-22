@@ -1,6 +1,7 @@
 {
 	"files.associations": {
 		"rc.local": "shellscript",
-		"**/openwrt/files/etc/uci-defaults/*": "shellscript"
+		"**/openwrt/files/etc/uci-defaults/*": "shellscript",
+		"**/openwrt/files/etc/hotplug.d/**/*": "shellscript"
 	}
 }

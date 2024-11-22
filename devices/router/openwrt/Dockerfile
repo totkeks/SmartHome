@@ -8,14 +8,9 @@ RUN OPENWRT_REVISION=${OPENWRT_REVISION} \
     && wget -q --show-progress --progress=bar:force -O- ${IMAGE_BUILDER} \
     | tar --zstd -x --strip-components=1 -C imagebuilder
 
-COPY files/ files/
-COPY packages.txt .
-COPY build.sh .
-
-RUN chmod +x build.sh \
-    && find files/ -type d -exec chmod 755 {} \; \
-    && find files/etc/uci-defaults/ -type f -exec chmod 755 {} \; \
-    && chmod 755 files/etc/rc.local \
-    && chmod 644 files/root/.profile
+COPY --chmod=555 build.sh .
+COPY --chmod=444 packages.txt .
+COPY --chmod=755 files/etc/ files/etc/
+COPY --chmod=600 files/root/ files/root/
 
 CMD ["./build.sh"]

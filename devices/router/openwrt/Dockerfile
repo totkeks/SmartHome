@@ -10,7 +10,9 @@ RUN OPENWRT_REVISION=${OPENWRT_REVISION} \
 
 COPY --chmod=555 build.sh .
 COPY --chmod=444 packages.txt .
+
 COPY --chmod=755 files/etc/ files/etc/
 COPY --chmod=600 files/root/ files/root/
+RUN chmod +x files/root/wireguard.sh
 
 CMD ["./build.sh"]

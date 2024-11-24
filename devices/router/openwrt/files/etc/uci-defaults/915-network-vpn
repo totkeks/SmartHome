@@ -1,0 +1,43 @@
+#!/bin/sh
+
+set -eux
+exec >> /root/uci-defaults.log 2>&1
+
+umask 077
+mkdir -p /etc/wireguard
+wg genkey \
+| tee /etc/wireguard/privatekey \
+| wg pubkey > /etc/wireguard/publickey
+
+PRIVATE_KEY=$(cat /etc/wireguard/privatekey)
+
+# WireGuard VPN (IPv4 and IPv6)
+uci set network.vpn='interface'
+uci set network.vpn.proto='wireguard'
+uci set network.vpn.private_key="$PRIVATE_KEY"
+uci set network.vpn.listen_port='51820'
+uci add_list network.vpn.addresses='10.10.50.1/24'
+uci add_list network.vpn.addresses='fdde:adc0:0c1e:50::1/64'
+
+# Firewall zone with limited access
+uci set firewall.vpn='zone'
+uci set firewall.vpn.name='vpn'
+uci set firewall.vpn.network='vpn'
+uci set firewall.vpn.input='ACCEPT'
+uci set firewall.vpn.output='ACCEPT'
+uci set firewall.vpn.forward='REJECT'
+
+# Allow traffic to the world
+uci set firewall.vpn_wan='forwarding'
+uci set firewall.vpn_wan.src='vpn'
+uci set firewall.vpn_wan.dest='wan'
+
+# Allow incoming WireGuard connections from WAN
+uci set firewall.allow_wireguard='rule'
+uci set firewall.allow_wireguard.name='Allow-WireGuard-Inbound'
+uci set firewall.allow_wireguard.src='wan'
+uci set firewall.allow_wireguard.dest_port='51820'
+uci set firewall.allow_wireguard.proto='udp'
+uci set firewall.allow_wireguard.target='ACCEPT'
+
+uci commit

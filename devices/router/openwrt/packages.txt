@@ -15,6 +15,12 @@ ddns-scripts
 ddns-scripts-cloudflare
 stubby
 
+# VPN
+kmod-wireguard
+wireguard-tools
+luci-proto-wireguard
+qrencode
+
 # USB storage
 kmod-usb-storage
 kmod-usb-storage-uas

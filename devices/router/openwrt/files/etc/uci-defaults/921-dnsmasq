@@ -7,8 +7,8 @@ uci set dhcp.@dnsmasq[0].local='/${DOMAIN}/'
 uci set dhcp.@dnsmasq[0].domain='${DOMAIN}'
 
 # Listen only on the internal interfaces
-uci -q delete dhcp.@dnsmasq[0].interface
-uci -q delete dhcp.@dnsmasq[0].notinterface
+uci -q delete dhcp.@dnsmasq[0].interface || true
+uci -q delete dhcp.@dnsmasq[0].notinterface || true
 
 uci add_list dhcp.@dnsmasq[0].interface='private_lan'
 uci add_list dhcp.@dnsmasq[0].interface='guest_lan'
@@ -18,7 +18,7 @@ uci add_list dhcp.@dnsmasq[0].interface='iot_lan'
 uci set dhcp.@dnsmasq[0].noresolv='1'
 uci set dhcp.@dnsmasq[0].proxydnssec='1'
 
-uci -q delete dhcp.@dnsmasq[0].server
+uci -q delete dhcp.@dnsmasq[0].server || true
 uci add_list dhcp.@dnsmasq[0].server='127.0.0.1#5453'
 
 uci commit dhcp

@@ -9,7 +9,7 @@ uci set system.@system[0].zonename='Europe/Berlin'
 
 # Setup root user
 set +x
-sed -i "s|^root::|root:${ROOT_PASSWORD_HASH}:|" /etc/shadow
+sed -i 's|^root::|root:${ROOT_PASSWORD_HASH}:|' /etc/shadow
 
 echo "${SSH_PUBLIC_KEY}" > /etc/dropbear/authorized_keys
 chmod 600 /etc/dropbear/authorized_keys

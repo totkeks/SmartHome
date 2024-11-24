@@ -4,17 +4,29 @@ set -eu
 
 echo "Starting OpenWrt build process..."
 
-# Replace environment variables in configuration files
 (
+	echo "Replacing environment variables in configuration files"
+
+	variable_names=()
 	mapfile -t env_vars < <(grep -vE '^(#|$)' .env)
+
 	for var in "${env_vars[@]}"; do
 		export "$var"
+
+		variable_name="${var%%=*}"
+		variable_names+=("$variable_name")
 	done
 
 	export ROOT_PASSWORD_HASH=$(openssl passwd -5 "$ROOT_PASSWORD")
+	variable_names+=("ROOT_PASSWORD_HASH")
+
+	# Prevent envsubst from replacing local variables in the files
+	echo "Variables to be replaced:"
+	printf -- "- %s\n" "${variable_names[@]}"
+	variables=$(printf '${%s} ' "${variable_names[@]}")
 
 	for file in ./files/etc/uci-defaults/*; do
-		envsubst < "$file" | sponge "$file"
+		envsubst "$variables" < "$file" | sponge "$file"
 	done
 )
 

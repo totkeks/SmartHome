@@ -58,6 +58,8 @@ uci set network.fiber_ont.proto='static'
 uci set network.fiber_ont.ipaddr='192.168.1.2'
 uci set network.fiber_ont.netmask='255.255.255.0'
 
+echo "192.168.1.1 ont" >> /etc/hosts
+
 # External WAN and WAN6 over USB tethering
 uci set network.tethering_wan=interface
 uci set network.tethering_wan.device='usb0'

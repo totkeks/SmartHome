@@ -64,4 +64,9 @@ uci set firewall.private_iot='forwarding'
 uci set firewall.private_iot.src='private'
 uci set firewall.private_iot.dest='iot'
 
+# Allow traffic to the SFP module's web interface
+uci set firewall.private_ont='forwarding'
+uci set firewall.private_ont.src='private'
+uci set firewall.private_ont.dest='ont'
+
 uci commit

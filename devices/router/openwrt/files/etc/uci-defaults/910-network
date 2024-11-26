@@ -51,15 +51,6 @@ uci add_list network.fiber_wan6.dns='2606:4700:4700::1111'
 uci add_list network.fiber_wan6.dns='2606:4700:4700::1001'
 uci set network.fiber_wan6.peerdns='0'
 
-# Access to the SFP module's web interface
-uci set network.fiber_ont=interface
-uci set network.fiber_ont.device='eth2'
-uci set network.fiber_ont.proto='static'
-uci set network.fiber_ont.ipaddr='192.168.1.2'
-uci set network.fiber_ont.netmask='255.255.255.0'
-
-echo "192.168.1.1 ont" >> /etc/hosts
-
 # External WAN and WAN6 over USB tethering
 uci set network.tethering_wan=interface
 uci set network.tethering_wan.device='usb0'
@@ -80,12 +71,28 @@ uci set network.tethering_wan6.peerdns='0'
 # WAN zone
 uci set firewall.wan='zone'
 uci set firewall.wan.name='wan'
-uci set firewall.wan.network='fiber_wan fiber_wan6 fiber_ont tethering_wan tethering_wan6'
+uci set firewall.wan.network='fiber_wan fiber_wan6 tethering_wan tethering_wan6'
 uci set firewall.wan.input='REJECT'
 uci set firewall.wan.output='ACCEPT'
 uci set firewall.wan.forward='REJECT'
 uci set firewall.wan.masq='1'
 uci set firewall.wan.mtu_fix='1'
+
+# Access to the SFP module's web interface
+uci set network.fiber_ont=interface
+uci set network.fiber_ont.device='eth2'
+uci set network.fiber_ont.proto='static'
+uci set network.fiber_ont.ipaddr='192.168.1.2'
+uci set network.fiber_ont.netmask='255.255.255.0'
+
+echo "192.168.1.1 ont" >> /etc/hosts
+
+uci set firewall.ont='zone'
+uci set firewall.ont.name='ont'
+uci set firewall.ont.network='fiber_ont'
+uci set firewall.ont.input='REJECT'
+uci set firewall.ont.output='ACCEPT'
+uci set firewall.ont.forward='REJECT'
 
 # Enable flow offloading to improve performance
 uci set firewall.@defaults[0].flow_offloading='1'

@@ -181,7 +181,7 @@ uci set firewall.allow_mld.src_ip='fe80::/10'
 uci add_list firewall.allow_mld.icmp_type='multicast-listener-query'
 uci add_list firewall.allow_mld.icmp_type='multicast-listener-report'
 uci add_list firewall.allow_mld.icmp_type='multicast-listener-done'
-uci add_list firewall.allow_mld.icmp_type='multicast-listener-report-v2'
+uci add_list firewall.allow_mld.icmp_type='v2-multicast-listener-report'
 uci set firewall.allow_mld.family='ipv6'
 uci set firewall.allow_mld.target='ACCEPT'
 

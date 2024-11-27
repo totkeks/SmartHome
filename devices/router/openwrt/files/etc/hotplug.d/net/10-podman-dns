@@ -1,0 +1,17 @@
+#!/bin/sh
+
+[[ $DEVICE == veth* ]] || exit 0
+
+logger -t podman "Containers changed, rebuilding DNS hosts"
+
+HOSTS_FILE="/tmp/hosts/podman"
+echo "# Container DNS entries" > "$HOSTS_FILE"
+
+podman ps -q| while read -r CONTAINER_ID; do
+	NAME=$(podman inspect --format '{{.Name}}' "$CONTAINER_ID" | sed 's/^\/\(.*\)/\1/')
+	IP=$(podman inspect --format '{{.NetworkSettings.IPAddress}}' "$CONTAINER_ID")
+
+	if [ -n "$IP" ]; then
+		echo "$IP    $NAME.${DOMAIN}" >> "$HOSTS_FILE"
+	fi
+done

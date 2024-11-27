@@ -1,16 +1,34 @@
 #!/bin/sh
 
-# set -eux
-# exec >> /root/uci-defaults.log 2>&1
+set -eux
+exec >> /root/uci-defaults.log 2>&1
 
 # Container LAN (virtual only)
-# uci set network.container_bridge=interface
-# uci set network.container_bridge='bridge'
+uci set network.container_bridge=device
+uci set network.container_bridge.name='br-container'
+uci set network.container_bridge.type='bridge'
+uci set network.container_bridge.bridge_empty='1'
 
-# uci set network.container_lan=interface
-# uci set network.container_lan.device='br-container'
-# uci set network.container_lan.proto='static'
-# uci set network.container_lan.ipaddr='10.10.40.1'
-# uci set network.container_lan.netmask='255.255.255.0'
+uci set network.container_lan=interface
+uci set network.container_lan.device='br-container'
+uci set network.container_lan.proto='static'
+uci set network.container_lan.ipaddr='10.10.40.1'
+uci set network.container_lan.netmask='255.255.255.0'
 
-# uci commit
+# Firewall zone with limited access
+uci set firewall.container='zone'
+uci set firewall.container.name='container'
+uci set firewall.container.network='container_lan'
+uci set firewall.container.input='REJECT'
+uci set firewall.container.output='ACCEPT'
+uci set firewall.container.forward='REJECT'
+
+# Allow DNS traffic from container to router
+uci set firewall.container_dns='rule'
+uci set firewall.container_dns.name='Allow-DNS-Container'
+uci set firewall.container_dns.src='container'
+uci set firewall.container_dns.dest_port='53'
+uci set firewall.container_dns.proto='udp'
+uci set firewall.container_dns.target='ACCEPT'
+
+uci commit

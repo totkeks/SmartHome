@@ -69,4 +69,9 @@ uci set firewall.private_ont='forwarding'
 uci set firewall.private_ont.src='private'
 uci set firewall.private_ont.dest='ont'
 
+# Allow traffic to the container network
+uci set firewall.private_container='forwarding'
+uci set firewall.private_container.src='private'
+uci set firewall.private_container.dest='container'
+
 uci commit

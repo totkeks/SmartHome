@@ -13,6 +13,7 @@ uci -q delete dhcp.@dnsmasq[0].notinterface || true
 uci add_list dhcp.@dnsmasq[0].interface='private_lan'
 uci add_list dhcp.@dnsmasq[0].interface='guest_lan'
 uci add_list dhcp.@dnsmasq[0].interface='iot_lan'
+uci add_list dhcp.@dnsmasq[0].interface='container_lan'
 uci add_list dhcp.@dnsmasq[0].interface='vpn'
 
 # Enable DNS security via local stubby instance

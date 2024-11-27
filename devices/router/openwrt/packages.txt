@@ -21,6 +21,9 @@ wireguard-tools
 luci-proto-wireguard
 qrencode
 
+# Containers
+podman
+
 # USB storage
 kmod-usb-storage
 kmod-usb-storage-uas
@@ -56,6 +59,3 @@ collectd-mod-thermal
 #collectd-mod-thermal
 #collectd-mod-wireless
 #collectd-mod-mqtt
-
-# Containers
-#podman

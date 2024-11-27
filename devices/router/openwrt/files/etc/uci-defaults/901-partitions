@@ -1,0 +1,16 @@
+#!/bin/sh
+
+set -eux
+exec >> /root/uci-defaults.log 2>&1
+
+UUID=$(blkid -o value -s UUID -t PARTLABEL='data' /dev/nvme*)
+
+mkdir -p /mnt/data
+
+uci set fstab.data=mount
+uci set fstab.data.target='/mnt/data'
+uci set fstab.data.uuid="$UUID"
+uci set fstab.data.options='noexec,noatime,nodiratime,discard'
+uci set fstab.data.enabled='1'
+
+uci commit

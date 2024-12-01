@@ -4,10 +4,13 @@ set -eux
 exec >> /root/uci-defaults.log 2>&1
 
 umask 077
-mkdir -p /etc/wireguard
-wg genkey \
-| tee /etc/wireguard/privatekey \
-| wg pubkey > /etc/wireguard/publickey
+mkdir -p /etc/wireguard/clients
+
+if [ ! -f /etc/wireguard/privatekey ] || [ ! -f /etc/wireguard/publickey ]; then
+	wg genkey \
+	| tee /etc/wireguard/privatekey \
+	| wg pubkey > /etc/wireguard/publickey
+fi
 
 PRIVATE_KEY=$(cat /etc/wireguard/privatekey)
 
@@ -39,5 +42,22 @@ uci set firewall.allow_wireguard.src='wan'
 uci set firewall.allow_wireguard.dest_port='51820'
 uci set firewall.allow_wireguard.proto='udp'
 uci set firewall.allow_wireguard.target='ACCEPT'
+
+# Restore existing clients
+for CLIENT in /etc/wireguard/clients/*; do
+	[ -e "$CLIENT" ] || continue
+
+	CLIENT_NAME=$(basename "$CLIENT")
+	. "$CLIENT"
+
+	uci add network wireguard_vpn
+	uci set network.@wireguard_vpn[-1].public_key="$PublicKey"
+	uci set network.@wireguard_vpn[-1].preshared_key="$PresharedKey"
+	uci set network.@wireguard_vpn[-1].description="$CLIENT_NAME"
+
+	for IP in $AllowedIPs; do
+		uci add_list network.@wireguard_vpn[-1].allowed_ips="$IP"
+	done
+done
 
 uci commit

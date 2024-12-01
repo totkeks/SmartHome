@@ -37,6 +37,7 @@ remove_client() {
 	fi
 
 	echo "Removing client '$name'..."
+	rm -f "/etc/wireguard/clients/$name"
 	uci delete network.@wireguard_vpn["$section"]
 	uci commit network
 	restart_vpn_service
@@ -91,6 +92,13 @@ add_client() {
 	uci commit network
 	restart_vpn_service
 
+	cat <<EOF > /etc/wireguard/clients/"$name"
+PublicKey=$CLIENT_PUBLIC_KEY
+PresharedKey=$CLIENT_PRESHARED_KEY
+AllowedIPs="$CLIENT_IPV4 $CLIENT_IPV6"
+EOF
+	chmod 600 /etc/wireguard/clients/"$name".conf
+
 	CLIENT_CONFIG=$(cat <<EOF
 [Interface]
 PrivateKey = $CLIENT_PRIVATE_KEY
@@ -105,7 +113,6 @@ AllowedIPs = 0.0.0.0/0, ::/0
 PersistentKeepalive = 25
 EOF
 )
-
 	echo "$CLIENT_CONFIG" | qrencode -t ansiutf8
 }
 

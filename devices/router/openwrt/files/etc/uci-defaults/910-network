@@ -15,6 +15,7 @@
 
 set -eux
 exec >> /root/uci-defaults.log 2>&1
+echo "Running 910-network"
 
 # Clear existing configuration
 uci delete network.lan

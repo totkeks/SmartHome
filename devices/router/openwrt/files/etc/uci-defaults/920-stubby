@@ -2,6 +2,7 @@
 
 set -eux
 exec >> /root/uci-defaults.log 2>&1
+echo "Running 920-stubby"
 
 uci delete stubby.global.trigger
 uci add_list stubby.global.trigger='fiber_wan'

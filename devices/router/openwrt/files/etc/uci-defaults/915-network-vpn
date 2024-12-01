@@ -2,6 +2,7 @@
 
 set -eux
 exec >> /root/uci-defaults.log 2>&1
+echo "Running 915-network-vpn"
 
 umask 077
 mkdir -p /etc/wireguard/clients

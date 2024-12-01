@@ -2,6 +2,7 @@
 
 set -eux
 exec >> /root/uci-defaults.log 2>&1
+echo "Running 901-partitions"
 
 UUID=$(blkid -o value -s UUID -t PARTLABEL='data' /dev/nvme*)
 

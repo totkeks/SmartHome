@@ -2,6 +2,7 @@
 
 # Base packages
 blkid
+block-mount
 ca-bundle
 curl
 ethtool-full

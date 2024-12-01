@@ -1,0 +1,113 @@
+#!/bin/sh
+
+set -eux
+exec >> /root/uci-defaults.log 2>&1
+
+# https://github.com/openwrt/packages/pull/25432
+# stubby: ensure appdata directory is present on service start
+patch -l /etc/init.d/stubby << 'EOF'
+@@ -11,6 +11,7 @@ stubby_config_dir="/var/etc/stubby"
+ stubby_config="$stubby_config_dir/stubby.yml"
+ stubby_pid_file="/var/run/stubby.pid"
+ stubby_manual_config="/etc/stubby/stubby.yml"
++stubby_default_appdata_dir="/var/lib/stubby"
+
+ boot()
+ {
+@@ -49,7 +50,7 @@ generate_config()
+     config_get round_robin "global" round_robin_upstreams "1"
+     echo "round_robin_upstreams: $round_robin"
+
+-    config_get appdata_dir "global" appdata_dir "/var/lib/stubby"
++    config_get appdata_dir "global" appdata_dir "$stubby_default_appdata_dir"
+     echo "appdata_dir: \"$appdata_dir\""
+
+     config_get trust_anchors_backoff_time "global" trust_anchors_backoff_time "2500"
+@@ -211,6 +212,7 @@ start_service() {
+     local manual
+     local log_level
+     local command_line_arguments
++    local appdata_dir
+
+     mkdir -p "$stubby_config_dir"
+
+@@ -228,6 +230,14 @@ start_service() {
+     chown stubby:stubby "$stubby_config"
+     chmod 0400 "$stubby_config"
+
++    config_get appdata_dir "global" appdata_dir "$stubby_default_appdata_dir"
++    if [ -n "$appdata_dir" ]; then
++        if mkdir -p "$appdata_dir"; then
++            chown stubby:stubby "$appdata_dir"
++            chmod 0700 "$appdata_dir"
++        fi
++    fi
++
+     config_get command_line_arguments "global" command_line_arguments ""
+
+     config_get log_level "global" log_level ""
+EOF
+
+# dnsmasq: use hostsdir instead of addn-hosts
+patch -l /etc/init.d/dnsmasq << 'EOF'
+@@ -1036,7 +1036,7 @@
+                xappend "--addn-hosts=$HOSTFILE"
+                append EXTRA_MOUNT "$HOSTFILE"
+        else
+-               xappend "--addn-hosts=$HOSTFILE_DIR"
++               xappend "--hostsdir=$HOSTFILE_DIR"
+                append EXTRA_MOUNT "$HOSTFILE_DIR"
+        fi
+        config_list_foreach "$cfg" "addnhosts" append_addnhosts
+EOF
+
+# sysupgrade: exclusively consider files in /etc/sysupgrade.conf and no other config files
+patch -l /sbin/sysupgrade << 'EOF'
+@@ -20,6 +20,7 @@
+ CONF_BACKUP_LIST=0
+ CONF_BACKUP=
+ CONF_RESTORE=
++CONF_EXCLUSIVE=1
+ NEED_IMAGE=
+ HELP=0
+ TEST=0
+@@ -50,6 +51,7 @@
+                -r|--restore-backup) CONF_RESTORE="$2" NEED_IMAGE=1; shift;;
+                -l|--list-backup) CONF_BACKUP_LIST=1;;
+                -f) CONF_IMAGE="$2"; shift;;
++               -e) CONF_EXCLUSIVE=0;;
+                -F|--force) export FORCE=1;;
+                -T|--test) TEST=1;;
+                -h|--help) HELP=1; break;;
+@@ -221,12 +223,30 @@
+        return 0
+ }
+
++build_list_of_exclusive_config_files() {
++    local file="$1"
++
++    local paths
++    paths=$(sed -ne '/^[[:space:]]*$/d; /^#/d; p' /etc/sysupgrade.conf 2>/dev/null)
++
++    if [ -z "$paths" ]; then
++       touch "$file"
++        return 0
++    fi
++
++    find $paths \( -type f -o -type l \) $find_filter 2>/dev/null | sort -u > "$file"
++
++    return 0
++}
++
+ if [ $SAVE_OVERLAY = 1 ]; then
+        [ ! -d /overlay/upper/etc ] && {
+                echo "Cannot find '/overlay/upper/etc', required for '-c' or '-o'" >&2
+                exit 1
+        }
+        sysupgrade_init_conffiles="build_list_of_backup_overlay_files"
++elif [ "$CONF_EXCLUSIVE" = 1 ]; then
++    sysupgrade_init_conffiles="build_list_of_exclusive_config_files"
+ else
+        sysupgrade_init_conffiles="build_list_of_backup_config_files"
+ fi
+EOF

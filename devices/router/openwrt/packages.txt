@@ -1,6 +1,7 @@
 # Add or remove (prefix with -) packages to/from the final image
 
 # Base packages
+blkid
 ca-bundle
 curl
 ethtool-full

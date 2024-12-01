@@ -2,6 +2,7 @@
 
 set -eux
 exec >> /root/uci-defaults.log 2>&1
+echo "Running 922-dynamic-dns"
 
 # Remove default configuration
 uci delete ddns.myddns_ipv4

@@ -2,6 +2,7 @@
 
 set -eux
 exec >> /root/uci-defaults.log 2>&1
+echo "Running 912-network-guest"
 
 # Guest LAN (wireless only)
 uci set network.guest_bridge=device

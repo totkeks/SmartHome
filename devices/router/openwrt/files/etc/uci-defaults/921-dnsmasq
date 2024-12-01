@@ -2,6 +2,7 @@
 
 set -eux
 exec >> /root/uci-defaults.log 2>&1
+echo "Running 921-dnsmasq"
 
 uci set dhcp.@dnsmasq[0].local='/${DOMAIN}/'
 uci set dhcp.@dnsmasq[0].domain='${DOMAIN}'

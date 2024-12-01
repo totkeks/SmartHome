@@ -2,6 +2,7 @@
 
 set -eux
 exec >> /root/uci-defaults.log 2>&1
+echo "Running 914-network-container"
 
 # Container LAN (virtual only)
 uci set network.container_bridge=device

@@ -8,6 +8,7 @@ fish
 htop
 lm-sensors
 nmap
+patch
 vim
 
 # DNS/DHCP

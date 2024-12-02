@@ -24,4 +24,7 @@ uci set dhcp.@dnsmasq[0].proxydnssec='1'
 uci -q delete dhcp.@dnsmasq[0].server || true
 uci add_list dhcp.@dnsmasq[0].server='127.0.0.1#5453'
 
+# Prevent stubby deadlocking dnsmasq on boot when time is not synced
+uci add_list dhcp.@dnsmasq[0].server='/pool.ntp.org/1.1.1.1'
+
 uci commit dhcp

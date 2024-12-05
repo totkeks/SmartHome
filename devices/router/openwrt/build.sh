@@ -25,7 +25,7 @@ echo "Starting OpenWrt build process..."
 	printf -- "- %s\n" "${variable_names[@]}"
 	variables=$(printf '${%s} ' "${variable_names[@]}")
 
-	for file in ./files/etc/uci-defaults/*; do
+	for file in ./files/etc/uci-defaults/* ./files/root/*; do
 		envsubst "$variables" < "$file" | sponge "$file"
 	done
 )

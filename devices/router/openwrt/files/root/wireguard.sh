@@ -97,7 +97,7 @@ PublicKey=$CLIENT_PUBLIC_KEY
 PresharedKey=$CLIENT_PRESHARED_KEY
 AllowedIPs="$CLIENT_IPV4 $CLIENT_IPV6"
 EOF
-	chmod 600 /etc/wireguard/clients/"$name".conf
+	chmod 600 /etc/wireguard/clients/"$name"
 
 	CLIENT_CONFIG=$(cat <<EOF
 [Interface]

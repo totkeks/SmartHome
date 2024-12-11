@@ -19,6 +19,7 @@ OpenWrt-based system customized with my packages and configurations through the 
    - Select the option to install to NAND.
 
 3. **Install to EMMC**:
+
    - Boot from NAND.
    - Select the option to install to EMMC.
 

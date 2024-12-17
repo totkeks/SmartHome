@@ -79,7 +79,7 @@ uci set firewall.wan.forward='REJECT'
 uci set firewall.wan.masq='1'
 uci set firewall.wan.mtu_fix='1'
 
-# Access to the SFP module's web interface
+# Access to the SFP module
 uci set network.fiber_ont=interface
 uci set network.fiber_ont.device='eth2'
 uci set network.fiber_ont.proto='static'
@@ -94,6 +94,7 @@ uci set firewall.ont.network='fiber_ont'
 uci set firewall.ont.input='REJECT'
 uci set firewall.ont.output='ACCEPT'
 uci set firewall.ont.forward='REJECT'
+uci set firewall.ont.masq='1'
 
 # Enable flow offloading to improve performance
 uci set firewall.@defaults[0].flow_offloading='1'

@@ -1,0 +1,115 @@
+#!/bin/sh /etc/rc.common
+
+START=100
+STOP=20
+USE_PROCD=1
+NAME=containers
+PROG=/usr/bin/podman
+CONFIG_PATH=/etc/containers/services
+DATA_PATH=/mnt/data/containers/services
+
+. /lib/functions.sh
+
+create_container() {
+	local cfg="$1"
+	local name vols caps image user
+
+	config_get name "$cfg" name "$cfg"
+	config_get image "$cfg" image
+	config_get data_dir "$cfg" data_dir
+	config_get user "$cfg" user
+
+	mkdir -p "$DATA_PATH/$name"
+	[ -n "$user" ] && chown -R "$user" "$DATA_PATH/$name"
+
+	append_cap() {
+		caps="$caps --cap-add=$1"
+	}
+	config_list_foreach "$cfg" cap_add append_cap
+
+	append_config_file() {
+		vols="$vols -v $CONFIG_PATH/$name/$1"
+	}
+	config_list_foreach "$cfg" config_file append_config_file
+
+	[ -n "$data_dir" ] && vols="$vols -v $DATA_PATH/$name:$data_dir"
+
+	$PROG container exists "$name" && {
+		logger -t "$NAME" "Container $name already exists"
+		return 0
+	}
+
+	logger -t "$NAME" "Creating container $name with image $image"
+	$PROG create --name="$name" \
+		$caps \
+		$vols \
+		"$image" || {
+		logger -t "$NAME" "Failed to create container $name"
+		return 1
+	}
+
+	return 0
+}
+
+start_container() {
+	local cfg="$1"
+	local enabled name
+
+	config_get enabled "$cfg" enabled 0
+	[ "$enabled" -eq 0 ] && return 0
+
+	create_container "$cfg" || return 1
+
+	config_get name "$cfg" name "$cfg"
+	logger -t "$NAME" "Starting container $name"
+
+	procd_open_instance "$name"
+	procd_set_param command "$PROG" start -ai "$name"
+	procd_set_param respawn
+	procd_close_instance
+}
+
+stop_container() {
+	local cfg="$1"
+	local name
+
+	config_get name "$cfg" name "$cfg"
+
+	logger -t "$NAME" "Stopping container $name"
+	$PROG stop "$name" 2>/dev/null
+}
+
+status_container() {
+	local cfg="$1"
+	local name enabled status
+
+	config_get enabled "$cfg" enabled 0
+	config_get name "$cfg" name "$cfg"
+
+	if [ "$enabled" -eq 0 ]; then
+		status="disabled"
+	elif ! $PROG container exists "$name"; then
+		status="not created"
+	elif $PROG ps --filter name="^${name}$" --format "{{.Names}}" | grep -q .; then
+		status="running"
+	else
+		status="stopped"
+	fi
+
+	printf "%-20s %s\n" "$name:" "$status"
+}
+
+start_service() {
+	config_load containers
+	config_foreach start_container container
+}
+
+stop_service() {
+	config_load containers
+	config_foreach stop_container container
+}
+
+status_service() {
+	config_load containers
+	config_foreach status_container container
+}

@@ -1,6 +1,6 @@
 #!/bin/sh
 
-[[ $DEVICE == veth* ]] || exit 0
+[[ $DEVICENAME == veth* ]] || exit 0
 
 logger -t podman "Containers changed, rebuilding DNS hosts"
 

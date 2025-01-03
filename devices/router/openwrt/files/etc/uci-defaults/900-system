@@ -12,7 +12,7 @@ uci set system.@system[0].zonename='Europe/Berlin'
 set +x
 sed -i 's|^root::|root:${ROOT_PASSWORD_HASH}:|' /etc/shadow
 
-echo "${SSH_PUBLIC_KEY}" > /etc/dropbear/authorized_keys
+echo "${SSH_PUBLIC_KEYS}" | tr ';' '\n' > /etc/dropbear/authorized_keys
 chmod 600 /etc/dropbear/authorized_keys
 set -x
 

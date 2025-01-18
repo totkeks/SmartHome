@@ -1,18 +1,5 @@
 #!/bin/sh
 
-# These are the physical network devices
-# eth0 Internal switch
-# eth1 SFP2 'LAN'
-# eth2 SFP1 'WAN'
-#
-# And on the switch there are 4 ports from SFP to power supply
-# wan, lan1, lan2, lan3
-#
-# These are the wireless devices
-# radio0 2.4GHz
-# radio1 5GHz
-# radio2 6GHz
-
 set -eux
 exec >> /root/uci-defaults.log 2>&1
 echo "Running 910-network"
@@ -31,12 +18,12 @@ while uci -q delete firewall.@rule[0]; do :; done
 # External WAN and WAN6 over SFP1 using PPPoE and VLAN 7
 uci set network.fiber_vlan=device
 uci set network.fiber_vlan.type='8021q'
-uci set network.fiber_vlan.ifname='eth2'
+uci set network.fiber_vlan.ifname='sfp-wan'
 uci set network.fiber_vlan.vid='7'
-uci set network.fiber_vlan.name='eth2.7'
+uci set network.fiber_vlan.name='sfp-wan.7'
 
 uci set network.fiber_wan=interface
-uci set network.fiber_wan.device='eth2.7'
+uci set network.fiber_wan.device='sfp-wan.7'
 uci set network.fiber_wan.proto='pppoe'
 uci set network.fiber_wan.username='${PPPOE_USERNAME}'
 uci set network.fiber_wan.password='${PPPOE_PASSWORD}'
@@ -81,7 +68,7 @@ uci set firewall.wan.mtu_fix='1'
 
 # Access to the SFP module
 uci set network.fiber_ont=interface
-uci set network.fiber_ont.device='eth2'
+uci set network.fiber_ont.device='sfp-wan'
 uci set network.fiber_ont.proto='static'
 uci set network.fiber_ont.ipaddr='192.168.1.2'
 uci set network.fiber_ont.netmask='255.255.255.0'

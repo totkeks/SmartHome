@@ -1,6 +1,6 @@
 #!/bin/sh
 
-[ "$ACTION" = ifup -a "$DEVICE" = eth2 ] || exit 0
+[ "$ACTION" = ifup -a "$DEVICE" = sfp-wan ] || exit 0
 
-logger -t sfp "Force 1Gbps full-duplex on SFP module (eth2)"
-ethtool -s eth2 speed 1000 duplex full autoneg off
+logger -t sfp "Force 1Gbps full-duplex on SFP module (sfp-wan)"
+ethtool -s sfp-wan speed 1000 duplex full autoneg off

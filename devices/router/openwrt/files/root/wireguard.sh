@@ -1,7 +1,7 @@
 #!/bin/sh
 
 usage() {
-	echo "Usage: $0 <action> <client_name> [--force]"
+	echo "Usage: $0 <action> <client_name> [--force] [--raw]"
 	echo ""
 	echo "Actions:"
 	echo "  add     Add a new WireGuard client"
@@ -9,10 +9,12 @@ usage() {
 	echo ""
 	echo "Options:"
 	echo "  --force Overwrite existing client (only applicable for add action)"
+	echo "  --raw   Show the raw client configuration instead of a QR code"
 	echo ""
 	echo "Examples:"
 	echo "  $0 add phone"
 	echo "  $0 add tablet --force"
+	echo "  $0 add laptop --raw"
 	echo "  $0 remove phone"
 	exit 1
 }
@@ -48,6 +50,7 @@ remove_client() {
 add_client() {
 	local name="$1"
 	local force="$2"
+	local raw="$3"
 	local section
 
 	section=$(get_client_section "$name")
@@ -113,7 +116,11 @@ AllowedIPs = 0.0.0.0/0, ::/0
 PersistentKeepalive = 25
 EOF
 )
-	echo "$CLIENT_CONFIG" | qrencode -t ansiutf8
+	if [ "$raw" -eq 1 ]; then
+		echo "$CLIENT_CONFIG"
+	else
+		echo "$CLIENT_CONFIG" | qrencode -t ansiutf8
+	fi
 }
 
 if [ $# -lt 2 ]; then
@@ -123,19 +130,37 @@ fi
 ACTION="$1"
 CLIENT_NAME="$2"
 FORCE=0
+RAW=0
 
-if [ "$#" -eq 3 ]; then
-	if [ "$3" = "--force" ]; then
-		FORCE=1
-	else
-		echo "Error: Unknown option '$3'"
-		usage
-	fi
+if [ "$#" -gt 4 ]; then
+	echo "Error: Too many arguments"
+	usage
+fi
+
+shift 2
+for option in "$@"; do
+	case "$option" in
+		--force)
+			FORCE=1
+			;;
+		--raw)
+			RAW=1
+			;;
+		*)
+			echo "Error: Unknown option '$option'"
+			usage
+			;;
+	esac
+done
+
+if [ "$ACTION" = "remove" ] && { [ "$FORCE" -eq 1 ] || [ "$RAW" -eq 1 ]; }; then
+	echo "Error: Options are only valid for add action"
+	usage
 fi
 
 case "$ACTION" in
 	add)
-		add_client "$CLIENT_NAME" "$FORCE"
+		add_client "$CLIENT_NAME" "$FORCE" "$RAW"
 		;;
 	remove)
 		remove_client "$CLIENT_NAME"
